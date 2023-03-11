@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>HLS播放器</title>
+    <style>
+        #iptAddr {
+            width: 50%;
+            height: 1.5rem;
+            margin: 1rem auto;
+        }
+
+        #video {
+            width: 50%;
+            background: black;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>HLS播放器</h1>
+    地址：<input id='iptAddr' value='https://fastly.jsdelivr.net/gh/iaoongin/cdn@main/hls/ying/ying.m3u8' />
+    <button id='submit'>提交</button>
+    <br />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <!-- Or if you want the latest version from the main branch -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@canary"></script> -->
+
+    <video id="video" controls></video>
+    <script>
+        $('#submit').click(e => {
+            load()
+        })
+
+        load()
+
+        function load(){
+            var video = document.getElementById('video');
+            var videoSrc = $('#iptAddr').val()
+            if (Hls.isSupported()) {
+                var hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = videoSrc;
+            }
+        }
+
+    </script>
+</body>
+
+</html>
