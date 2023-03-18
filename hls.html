@@ -37,7 +37,7 @@
 
         load()
 
-        function load(){
+        function load() {
             var video = document.getElementById('video');
             var videoSrc = $('#iptAddr').val()
             if (Hls.isSupported()) {
@@ -48,8 +48,17 @@
                 video.src = videoSrc;
             }
         }
-
     </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?f31161b739fb2146bfdec69fa544e4a2";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
 </body>
 
 </html>
