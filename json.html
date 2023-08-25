@@ -1,0 +1,573 @@
+<html lang="zh"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 工具</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+
+        #panel {
+            position: relative;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            height: 90%;
+            padding: 5px;
+
+        }
+
+        .red {
+            background-color: whitesmoke;
+        }
+
+        .green {
+            background-color: wheat;
+        }
+
+        .textRed {
+            color: red;
+        }
+
+        #raw {
+            width: 60%;
+        }
+
+        #pretty {
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        #raw,
+        #pretty {
+            /* border: solid 1px black; */
+            height: 100%;
+            resize: none;
+            /* margin: 0 5px; */
+            word-wrap: unset;
+            border: none;
+            font-size: 1rem;
+            line-height: 1.5em;
+            font-family: menlo, monospace, Tahoma, "微软雅黑", "幼圆";
+
+        }
+
+        textarea:focus {
+            outline: none !important;
+        }
+
+        #resize {
+            width: 10px;
+            cursor: w-resize;
+            -webkit-user-select: none;
+        }
+
+        #histryTxt {
+            width: 10rem;
+            text-align: center;
+            text-align-last: center;
+        }
+
+        #histryTxt option{
+            width: 10px !important;
+        }
+        
+
+        @media screen and (max-width: 1200px) {
+            #panel {
+                display: block;
+                width: calc(100% - 10px);
+            }
+
+            #raw,
+            #pretty {
+                height: 45%;
+            }
+        }
+    </style>
+<style data-id="immersive-translate-input-injected-css">.immersive-translate-input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2147483647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.immersive-translate-input-loading {
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+}
+
+@keyframes immersiveTranslateShadowRolling {
+  0% {
+    box-shadow: 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  12% {
+    box-shadow: 100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  25% {
+    box-shadow: 110px 0 var(--loading-color), 100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  36% {
+    box-shadow: 120px 0 var(--loading-color), 110px 0 var(--loading-color), 100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  50% {
+    box-shadow: 130px 0 var(--loading-color), 120px 0 var(--loading-color), 110px 0 var(--loading-color), 100px 0 var(--loading-color);
+  }
+
+  62% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color), 120px 0 var(--loading-color), 110px 0 var(--loading-color);
+  }
+
+  75% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color), 120px 0 var(--loading-color);
+  }
+
+  87% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color);
+  }
+
+  100% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0);
+  }
+}
+
+
+.immersive-translate-search-recomend {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  font-size: 16px;
+}
+.immersive-translate-search-enhancement-en-title {
+  color: #4d5156;
+}
+/* dark */
+@media (prefers-color-scheme: dark) {
+  .immersive-translate-search-recomend {
+    border: 1px solid #3c4043;
+  }
+  .immersive-translate-close-action svg {
+    fill: #bdc1c6;
+  }
+
+.immersive-translate-search-enhancement-en-title {
+  color: #bdc1c6;
+}
+}
+
+
+.immersive-translate-search-settings {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  cursor: pointer;
+}
+
+.immersive-translate-search-recomend::before {
+  /* content: " "; */
+  /* width: 20px; */
+  /* height: 20px; */
+  /* top: 16px; */
+  /* position: absolute; */
+  /* background: center / contain url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAxlBMVEUAAADpTInqTIjpSofnSIfqS4nfS4XqS4nqTIjsTYnrTInqTIroS4jvQIDqTIn////+/v7rSYjpTIn8/v7uaZzrTIr9/f3wfansWJL88/b85e73qc39+/v3xNnylrvrVI/98fb62Obva5/8+fr76vH4y9zpSIj74e353Oj1ocTzm77xhK/veKbtYpjsXJTqU47oTInxjrXyh7L99fj40eH2ttH1udD3sc31ssz1rMnykLXucqPtbqD85e/1xdn2u9DzqcXrUY6FaJb8AAAADnRSTlMA34BgIM8Q37/fz7+/EGOHcVQAAAGhSURBVDjLhZPncuowEEZFTW7bXVU7xsYYTO/p7bb3f6lICIOYJOT4h7/VnFmvrBFjrF3/CR/SajBHswafctG0Qg3O8O0Xa8BZ6uw7eLjqr30SofCDVSkemMinfL1ecy20r5ygR5zz3ArcAqJExPTPKhDENEmS30Q9+yo4lEQkqVTiIEAHCT10xWERRdH0Bq0aCOPZNDV3s0xaYce1lHEoDHU8wEh3qRJypNcTAeKUIjgKMeGLDoRCLVLTVf+Ownj8Kk6H9HM6QXPgYjQSB0F00EJEu10ILQrs/QeP77BSSr0MzLOyuJJQbnUoOOIUI/A8EeJk9E4YUHUWiRyTVKGgQUB8/3e/NpdGlfI+FMQyWsCBWyz4A/ZyHXyiiz0Ne5aGZssoxRmcChw8/EFKQ5JwwkUo3FRT5yXS7q+Y/rHDZmFktzpGMvO+5QofA4FPpEmGw+EWRCFvnaof7Zhe8NuYSLR0xErKLThUSs8gnODh87ssy6438yzbLzxl012HS19vfCf3CNhnbWOL1eEsDda+gDPUvri8tSZzNFrwIZf1NmNvqC1I/t8j7nYAAAAASUVORK5CYII='); */
+}
+
+.immersive-translate-search-title {}
+
+.immersive-translate-search-title-wrapper {}
+
+.immersive-translate-search-time {
+  font-size: 12px;
+  margin: 4px 0 24px;
+  color: #70757a;
+}
+
+.immersive-translate-expand-items {
+  display: none;
+}
+
+.immersive-translate-search-more {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.immersive-translate-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.immersive-translate-modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  font-family: system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu",
+    "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.immersive-translate-modal-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: hsl(205, 20%, 32%);
+}
+
+.immersive-translate-modal-body {
+  color: hsl(205, 20%, 32%)
+}
+
+.immersive-translate-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.immersive-translate-close:hover,
+.immersive-translate-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.immersive-translate-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.immersive-translate-btn {
+  color: #fff;
+  background-color: #ea4c89;
+  border: none;
+  font-size: 14px;
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.immersive-translate-cancel-btn {
+  /* gray color */
+  background-color: rgb(89, 107, 120);
+}
+
+.immersive-translate-btn:hover {
+  background-color: #f082ac;
+}
+
+.immersive-translate-cancel-btn:hover {
+  background-color: hsl(205, 20%, 32%);
+}
+
+
+.immersive-translate-btn svg {
+  margin-right: 5px;
+}
+
+.immersive-translate-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #007bff;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, .1);
+}
+
+.immersive-translate-modal input[type="radio"] {
+  margin: 0 6px 16px;
+  cursor: pointer;
+}
+
+.immersive-translate-modal label {
+  cursor: pointer;
+}
+
+.immersive-translate-close-action {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+  cursor: pointer;
+}
+</style></head>
+
+<body>
+    <div id="header">
+        <div style="margin: 1rem 0;">JSON 格式化</div>
+        <div>
+            <button onclick="removeXGMH()">去掉\"</button>
+            <button onclick="compress()">压缩</button>
+            <button onclick="transfer()">转义引号</button>
+            <button onclick="clean()">清空</button>
+            <select id="histryTxt"><option value="">--------- 历史 ---------</option></select>
+            <button id="cleanHistryTxt">清空历史</button>
+        </div>
+    </div>
+    <div id="panel">
+        <textarea id="raw" class="red"></textarea>
+        <div id="resize"></div>
+        <textarea id="pretty" class="green"></textarea>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.11.1/dist/jquery.min.js"></script>
+    <script>
+        const _r = $('#raw')
+        const _p = $('#pretty')
+        _r.keyup(_stringify)
+        _r.change(_stringify)
+
+        _stringify()
+
+        function _stringify() {
+            try {
+                var rVal = _r.val()
+                if (!rVal) {
+                    return
+                }
+                var array = parse(rVal)
+                var _pVal = JSON.stringify(array, null, '\t')
+                _p.val(_pVal)
+                _p.removeClass('textRed')
+            } catch (error) {
+                _p.val(error)
+                _p.addClass('textRed')
+            }
+
+        }
+
+        function parse(text, maxLevel, level) {
+
+            if (!maxLevel) {
+                maxLevel = 20
+            }
+
+            if (!level) {
+                level = 0
+            }
+
+            if (level > maxLevel) {
+                return text;
+            }
+
+            var array = JSON.parse(text);
+            if (Array.isArray(array)) {
+                return array.map(item => {
+                    try {
+                        return parse(item, maxLevel, level + 1);
+                    } catch (e) {
+                        // console.log(e)
+                        return item
+                    }
+                })
+            } else if (typeof array == 'string') {
+                return parse(array.replaceAll(/\"/g, '"'), maxLevel, level + 1)
+
+            } else {
+                return array
+            }
+
+        }
+
+
+        // 拖动
+        // let rW = $('#raw').width()
+        // let pW = $('#pretty').width()
+        $('#resize').on('mousedown', e => {
+            let disX = e.clientX
+            let w_r = _r.width()
+            let w_p = _p.width()
+
+            // console.log('w_r', w_r);
+            // console.log('w_p', w_p);
+
+            $('#panel').on('mousemove', ex => {
+                let move = ex.clientX - disX
+                // console.log('move', move);
+
+                let newWidth = w_r + ex.clientX - disX
+                let newWidth_p = w_p + disX - ex.clientX
+
+                // console.log('newWidth', newWidth);
+                // console.log('newWidth_p', newWidth_p);
+
+                _r.width(newWidth)
+                _p.width(newWidth_p)
+
+            })
+        })
+
+        $('#panel').on('mouseup', e => {
+            $('#panel').unbind('mousemove')
+        })
+
+
+        /** 按钮方法 start*/
+        function removeXGMH() {
+            _r.val(_r.val().replace(/\\\"/g, '"'))
+            _stringify()
+        }
+
+        function compress() {
+            var compressStr = _p.val().replace(/\n|\r|\t| /g, '')
+            _p.val(compressStr)
+        }
+
+        function transfer() {
+            var str = _p.val().replace(/\"/g, '\\\"').replace(/\'/g, '\\\'')
+            _p.val(str)
+        }
+
+        function clean() {
+            _p.val('')
+        }
+
+
+        function loadHistory() {
+            var historyTxt = localStorage.getItem('historyTxt')
+
+            $('#histryTxt')
+        }
+        /** 按钮方法 end*/
+
+
+    </script>
+
+    <script type="module">
+        import { encode, decode } from 'https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.mjs';
+        const key = 'historyTxtArray'
+        const _r = $('#raw')
+        const _p = $('#pretty')
+        const cacheSize = 100
+        const map = new Map()
+
+        /** 按钮方法 2 start*/
+        loadHistory()
+
+        function hashCode(str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                var character = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + character;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash;
+        }
+        function loadHistory() {
+            var set = getSet()
+
+            $('#histryTxt').html('')
+            // if (!set || set.size == 0) {
+            //     $('#histryTxt').prepend(`<option>--------- 历史 ---------</option>`)
+            // }
+
+            $('#histryTxt').prepend(`<option value=''>--------- 历史 ---------</option>`)
+            set.forEach(s => {
+                let hash = hashCode(s)
+                let txt = decode(s)
+                let txtPart = txt.substring(0, 100) + (txt.length > 100 ? ' ......' : '')
+                map.set(hash, txt)
+                $('#histryTxt').prepend(`<option value="${hash}">${txtPart}</option>`)
+            })
+
+            // console.log(map.keys());
+            // console.log(map);
+
+
+        }
+
+        function saveHistory() {
+
+            var val = _r.val()
+            if (!val) {
+                return
+            }
+            var set = getSet()
+            set.add(encode(val))
+            saveSet(set)
+        }
+
+        function getSet() {
+            var historyTxtArray = localStorage.getItem(key)
+            var set = historyTxtArray ? new Set(JSON.parse(historyTxtArray)) : new Set()
+            if (set.size > cacheSize) {
+                var v = set[Symbol.iterator]().next().value
+                set.delete(v);
+            }
+            return set;
+        }
+
+        function saveSet(set) {
+            localStorage.setItem(key, JSON.stringify(Array.from(set)))
+        }
+
+
+        $('#raw').focusout(e => {
+            saveHistory()
+            loadHistory()
+        })
+
+        $('#histryTxt').change(e => {
+            let hash = Number($('#histryTxt').val())
+            let txt = map.get(hash)
+            
+            _r.val(txt)
+            _stringify()
+        })
+
+        $('#cleanHistryTxt').click(() => cleanHistryTxt())
+        function cleanHistryTxt() {
+            saveSet(new Set())
+            loadHistory()
+        }
+        /** 按钮方法 2 end*/
+    </script>
+
+    <script type="module">
+
+    </script>
+
+
+</body></html>
