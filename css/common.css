@@ -1,0 +1,52 @@
+/* 小按钮样式 */
+.button-small {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  
+  /* 中按钮样式 */
+  .button-medium {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+  
+  /* 大按钮样式 */
+  .button-large {
+    font-size: 18px;
+    padding: 14px 28px;
+  }
+  
+  /* 普通按钮样式 */
+  .button-normal {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  /* 警告按钮样式 */
+  .button-warning {
+    background-color: #ffc107;
+    color: #000;
+  }
+  
+  /* 危险按钮样式 */
+  .button-danger {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  /* 成功按钮样式 */
+  .button-success {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  /* 通用按钮样式 */
+  .button {
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .tips{
+    color: gainsboro;
+  }

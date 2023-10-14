@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>生成密码</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <style>
+      /* CSS 样式 */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        /* text-align: center; */
+      }
+
+      h1 {
+        margin-top: 50px;
+      }
+
+      .password {
+        font-size: 24px;
+        margin: 20px 0;
+      }
+
+      .history {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 800px;
+        margin-top: 20px;
+        max-height: 800px;
+        overflow: scroll;
+        overflow-x: hidden;
+
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      #passwordList {
+        margin: 10px 0;
+        padding: 10px 0;
+      }
+
+      /* 优化滚动条样式 */
+      .history::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .history::-webkit-scrollbar-track {
+        background-color: #f2f2f2;
+        border-radius: 4px;
+      }
+
+      .history::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 4px;
+      }
+
+      .history::-webkit-scrollbar-thumb:hover {
+        background-color: #999;
+      }
+
+      .history::-webkit-scrollbar-thumb:active {
+        background-color: #666;
+      }
+
+      .password-item {
+        margin-bottom: 10px;
+        top: 50px;
+        
+      }
+
+      .password-item span{
+        border-bottom: 1px solid black;
+      }
+
+      .password-item button{
+        margin-left: 0.8rem;
+      }
+
+      #length {
+        font-size: 16px;
+        padding: 8px;
+        width: 150px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      #length option {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>生成密码</h1>
+
+    <div>
+      <label for="length">密码长度：</label>
+
+      <select id="length">
+        <!-- 使用 JavaScript 动态生成选项 -->
+      </select>
+    </div>
+
+    <label for="includeNumbers">
+      <input type="checkbox" id="includeNumbers" checked />数字（0-9）
+    </label>
+
+    <label for="includeLetters">
+      <input type="checkbox" id="includeLetters" checked />字母（a-zA-Z）
+    </label>
+
+    <label for="includeSpecialChars">
+      <input
+        type="checkbox"
+        id="includeSpecialChars"
+      />特殊字符（!@#$%^&*()_+-={}[]|:;"<>,.?/~`）
+    </label>
+    <div>
+      <label for="includeConfusingChars">
+        <input type="checkbox" id="includeConfusingChars" />
+        易混淆的字符（Il1O0）
+      </label>
+    </div>
+
+    <div class="password"></div>
+    <button
+      onclick="generatePassword()"
+      class="button button-medium button-normal"
+    >
+      生成密码
+    </button>
+
+   
+    <div class="history">
+        <!-- <h2 style="position: fixed;"> -->
+        <h2>
+            历史密码
+            <button
+              onclick="copyAllPasswords()"
+              class="button button-small button-normal"
+            >
+              复制全部
+            </button>
+            <button
+              onclick="clearAllPasswords()"
+              class="button button-small button-danger"
+            >
+              清空全部
+            </button>
+          </h2>
+      <div id="passwordList"></div>
+    </div>
+
+    <script>
+      // JavaScript 代码
+      // 动态生成密码长度选项
+      const lengthSelect = document.getElementById("length");
+      for (let i = 1; i <= 64; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        if (i == 12) {
+          option.selected = "selected";
+        }
+        lengthSelect.appendChild(option);
+      }
+
+      // 获取历史密码列表
+      function getHistoryPasswords() {
+        const storedPasswords = localStorage.getItem("passwords");
+        if (storedPasswords) {
+          return JSON.parse(storedPasswords);
+        } else {
+          return [];
+        }
+      }
+
+      // 更新历史密码列表
+      function updateHistoryPasswords(password, timestamp) {
+        const historyPasswords = getHistoryPasswords();
+        historyPasswords.push({ password, timestamp });
+        localStorage.setItem("passwords", JSON.stringify(historyPasswords));
+      }
+
+      // 生成密码
+      function generatePassword() {
+        const lengthInput = document.getElementById("length");
+        const length = parseInt(lengthInput.value); // 密码长度
+        const includeNumbers =
+          document.getElementById("includeNumbers").checked;
+        const includeLetters =
+          document.getElementById("includeLetters").checked;
+        const includeSpecialChars = document.getElementById(
+          "includeSpecialChars"
+        ).checked;
+        const includeConfusingChars = document.getElementById(
+          "includeConfusingChars"
+        ).checked;
+
+        let charset = "";
+        if (includeNumbers) {
+          charset += "0123456789";
+        }
+        if (includeLetters) {
+          charset += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        }
+        if (includeSpecialChars) {
+          charset += '!@#$%^&*()_+-={}[]|:;"<>,.?/~`';
+        }
+        if (!includeConfusingChars) {
+          charset = charset.replace(/[Il1O0]/g, ""); // 排除易混淆字符
+        }
+
+        let password = "";
+
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * charset.length);
+          password += charset[randomIndex];
+        }
+
+        const passwordElement = document.querySelector(".password");
+        passwordElement.textContent = password;
+
+        const timestamp = new Date().toLocaleString();
+        updateHistoryPasswords(password, timestamp);
+        displayHistoryPasswords();
+      }
+
+      // 显示历史密码列表
+      function displayHistoryPasswords() {
+        const passwordList = document.getElementById("passwordList");
+        passwordList.innerHTML = "";
+
+        const historyPasswords = getHistoryPasswords();
+
+        if(historyPasswords == null || historyPasswords.length == 0){
+          passwordList.innerHTML = "暂无";
+          return
+        }
+        
+        reverseHistoryPasswords = historyPasswords.reverse()
+
+        reverseHistoryPasswords.forEach((passwordObj, index) => {
+          const passwordItem = document.createElement("div");
+
+          const spanItem = document.createElement("span")
+          spanItem.textContent = `${passwordObj.password}`;
+          passwordItem.className = "password-item";
+          passwordItem.appendChild(spanItem)
+
+          const spanCreateDateItem = document.createElement("span")
+          spanCreateDateItem.textContent = ` (${passwordObj.timestamp})`
+          spanCreateDateItem.className = "tips";
+          passwordItem.appendChild(spanCreateDateItem)
+
+          const copyButton = document.createElement("button");
+          copyButton.textContent = "复制";
+          copyButton.className = "button button-small button-normal ";
+          copyButton.onclick = () => copyPassword(index);
+          passwordItem.appendChild(copyButton);
+
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "删除";
+          deleteButton.className = "button button-small button-warning ";
+          deleteButton.onclick = () => deletePassword(index);
+          passwordItem.appendChild(deleteButton);
+
+          passwordList.appendChild(passwordItem);
+        });
+      }
+
+      // 删除密码
+      function deletePassword(index) {
+        const historyPasswords = getHistoryPasswords();
+        historyPasswords.splice(index, 1);
+        localStorage.setItem("passwords", JSON.stringify(historyPasswords));
+        displayHistoryPasswords();
+      }
+
+      // 复制密码
+      function copyPassword(index) {
+        const historyPasswords = getHistoryPasswords();
+        const thePwd = historyPasswords[index].password;
+        navigator.clipboard.writeText(thePwd);
+      }
+
+      // 复制全部密码
+      function copyAllPasswords() {
+        const historyPasswords = getHistoryPasswords();
+        const allPasswords = historyPasswords
+          .map((passwordObj) => passwordObj.password)
+          .join("\n");
+        navigator.clipboard.writeText(allPasswords);
+      }
+
+      // 清空全部密码
+      function clearAllPasswords() {
+        localStorage.removeItem("passwords");
+        displayHistoryPasswords();
+      }
+
+      // 初始显示历史密码列表
+      displayHistoryPasswords();
+    </script>
+  </body>
+</html>
