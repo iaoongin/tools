@@ -274,8 +274,12 @@
 
       // 删除密码
       function deletePassword(index) {
-        const historyPasswords = getHistoryPasswords();
-        historyPasswords.splice(index, 1);
+        let historyPasswords = getHistoryPasswords();
+        const reverseHistoryPasswords = historyPasswords.reverse()
+        reverseHistoryPasswords.splice(index, 1);
+
+        historyPasswords = reverseHistoryPasswords.reverse()
+
         localStorage.setItem("passwords", JSON.stringify(historyPasswords));
         displayHistoryPasswords();
       }
@@ -283,7 +287,8 @@
       // 复制密码
       function copyPassword(index) {
         const historyPasswords = getHistoryPasswords();
-        const thePwd = historyPasswords[index].password;
+        const reverseHistoryPasswords = historyPasswords.reverse()
+        const thePwd = reverseHistoryPasswords[index].password;
         navigator.clipboard.writeText(thePwd);
       }
 
