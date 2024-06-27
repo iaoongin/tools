@@ -53,7 +53,8 @@
         window.location.hash = `#${href}`;
       });
 
-      $("iframe").attr("src", `pages/${window.location.hash.slice(1)}/index.html`);
+      let hash = window.location.hash.slice(1) || "json";
+      $("iframe").attr("src", `pages/${hash}/index.html`);
     </script>
   </body>
 </html>
