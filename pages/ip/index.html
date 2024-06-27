@@ -24,6 +24,8 @@
     <div>
         您的IP是：
         <h1 id="ipInfo"></h1>
+        地理位置：
+        <h1 id="location"></h1>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
@@ -35,6 +37,7 @@
                 .then(blob => blob.json())
                 .then(res => {
                     $('#ipInfo').html(res.ip)
+                    $('#location').html(res.country)
                 })
         }
     </script>

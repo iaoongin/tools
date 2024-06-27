@@ -1,0 +1,244 @@
+<html lang="zh"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 工具</title>
+    <link rel="stylesheet" href="index.css" crossorigin="anonymous"></head>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+<body>
+    <div id="header">
+        <div style="margin: 1rem 0;">JSON 格式化</div>
+        <div>
+            <button class="border-2 border-gray-300 rounded-md px-1 m-1" onclick="removeXGMH()">去掉\"</button>
+            <button class="border-2 border-gray-300 rounded-md px-1 m-1"  onclick="compress()">压缩</button>
+            <button class="border-2 border-gray-300 rounded-md px-1 m-1"  onclick="transfer()">转义引号</button>
+            <button class="border-2 border-gray-300 rounded-md px-1 m-1"  onclick="clean()">清空</button>
+            <select class="border-2 border-gray-300 rounded-md px-1 m-1"  id="histryTxt"><option value="">--------- 历史 ---------</option></select>
+            <button class="border-2 border-gray-300 rounded-md px-1 m-1"  id="cleanHistryTxt">清空历史</button>
+        </div>
+    </div>
+    <div id="panel">
+        <textarea id="raw" class="red"></textarea>
+        <div id="resize"></div>
+        <textarea id="pretty" class="green"></textarea>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.11.1/dist/jquery.min.js"></script>
+    <script>
+        const _r = $('#raw')
+        const _p = $('#pretty')
+        _r.keyup(_stringify)
+        _r.change(_stringify)
+
+        _stringify()
+
+        function _stringify() {
+            try {
+                var rVal = _r.val()
+                if (!rVal) {
+                    return
+                }
+                var array = parse(rVal)
+                var _pVal = JSON.stringify(array, null, '\t')
+                _p.val(_pVal)
+                _p.removeClass('textRed')
+            } catch (error) {
+                _p.val(error)
+                _p.addClass('textRed')
+            }
+
+        }
+
+        function parse(text, maxLevel, level) {
+
+            if (!maxLevel) {
+                maxLevel = 20
+            }
+
+            if (!level) {
+                level = 0
+            }
+
+            if (level > maxLevel) {
+                return text;
+            }
+
+            var array = JSON.parse(text);
+            if (Array.isArray(array)) {
+                return array.map(item => {
+                    try {
+                        return parse(item, maxLevel, level + 1);
+                    } catch (e) {
+                        // console.log(e)
+                        return item
+                    }
+                })
+            } else if (typeof array == 'string') {
+                return parse(array.replaceAll(/\"/g, '"'), maxLevel, level + 1)
+
+            } else {
+                return array
+            }
+
+        }
+
+
+        // 拖动
+        // let rW = $('#raw').width()
+        // let pW = $('#pretty').width()
+        $('#resize').on('mousedown', e => {
+            let disX = e.clientX
+            let w_r = _r.width()
+            let w_p = _p.width()
+
+            // console.log('w_r', w_r);
+            // console.log('w_p', w_p);
+
+            $('#panel').on('mousemove', ex => {
+                let move = ex.clientX - disX
+                // console.log('move', move);
+
+                let newWidth = w_r + ex.clientX - disX
+                let newWidth_p = w_p + disX - ex.clientX
+
+                // console.log('newWidth', newWidth);
+                // console.log('newWidth_p', newWidth_p);
+
+                _r.width(newWidth)
+                _p.width(newWidth_p)
+
+            })
+        })
+
+        $('#panel').on('mouseup', e => {
+            $('#panel').unbind('mousemove')
+        })
+
+
+        /** 按钮方法 start*/
+        function removeXGMH() {
+            _r.val(_r.val().replace(/\\\"/g, '"'))
+            _stringify()
+        }
+
+        function compress() {
+            var compressStr = _p.val().replace(/\n|\r|\t| /g, '')
+            _p.val(compressStr)
+        }
+
+        function transfer() {
+            var str = _p.val().replace(/\"/g, '\\\"').replace(/\'/g, '\\\'')
+            _p.val(str)
+        }
+
+        function clean() {
+            _p.val('')
+        }
+
+
+        function loadHistory() {
+            var historyTxt = localStorage.getItem('historyTxt')
+
+            $('#histryTxt')
+        }
+        /** 按钮方法 end*/
+
+
+    </script>
+
+    <script type="module">
+        import { encode, decode } from 'https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.mjs';
+        const key = 'historyTxtArray'
+        const _r = $('#raw')
+        const _p = $('#pretty')
+        const cacheSize = 100
+        const map = new Map()
+
+        /** 按钮方法 2 start*/
+        loadHistory()
+
+        function hashCode(str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                var character = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + character;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash;
+        }
+        function loadHistory() {
+            var set = getSet()
+
+            $('#histryTxt').html('')
+            // if (!set || set.size == 0) {
+            //     $('#histryTxt').prepend(`<option>--------- 历史 ---------</option>`)
+            // }
+
+            $('#histryTxt').prepend(`<option value=''>--------- 历史 ---------</option>`)
+            set.forEach(s => {
+                let hash = hashCode(s)
+                let txt = decode(s)
+                let txtPart = txt.substring(0, 100) + (txt.length > 100 ? ' ......' : '')
+                map.set(hash, txt)
+                $('#histryTxt').prepend(`<option value="${hash}">${txtPart}</option>`)
+            })
+
+            // console.log(map.keys());
+            // console.log(map);
+
+
+        }
+
+        function saveHistory() {
+
+            var val = _r.val()
+            if (!val) {
+                return
+            }
+            var set = getSet()
+            set.add(encode(val))
+            saveSet(set)
+        }
+
+        function getSet() {
+            var historyTxtArray = localStorage.getItem(key)
+            var set = historyTxtArray ? new Set(JSON.parse(historyTxtArray)) : new Set()
+            if (set.size > cacheSize) {
+                var v = set[Symbol.iterator]().next().value
+                set.delete(v);
+            }
+            return set;
+        }
+
+        function saveSet(set) {
+            localStorage.setItem(key, JSON.stringify(Array.from(set)))
+        }
+
+
+        $('#raw').focusout(e => {
+            saveHistory()
+            loadHistory()
+        })
+
+        $('#histryTxt').change(e => {
+            let hash = Number($('#histryTxt').val())
+            let txt = map.get(hash)
+            
+            _r.val(txt)
+            _stringify()
+        })
+
+        $('#cleanHistryTxt').click(() => cleanHistryTxt())
+        function cleanHistryTxt() {
+            saveSet(new Set())
+            loadHistory()
+        }
+        /** 按钮方法 2 end*/
+    </script>
+
+    <script type="module">
+
+    </script>
+
+
+</body></html>
